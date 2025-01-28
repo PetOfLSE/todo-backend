@@ -1,6 +1,8 @@
 package com.example.todo.auth.controller;
 
+import com.example.todo.auth.controller.request.LoginRequest;
 import com.example.todo.auth.controller.request.RegisterRequest;
+import com.example.todo.auth.controller.response.LoginResponse;
 import com.example.todo.auth.controller.response.UserResponse;
 import com.example.todo.auth.service.AuthService;
 import com.example.todo.common.exception.response.ExceptionResponse;
@@ -46,4 +48,23 @@ public class AuthController {
     ){
         return ResponseEntity.ok(authService.register(registerRequest));
     }
+
+    @Operation(summary = "사용자 로그인 API", description = "사용자 로그인 처리 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))
+            }, description = "로그인 성공 시 반환")
+    })
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "로그인 요청 객체",
+                    content = @Content(schema = @Schema(implementation = LoginRequest.class))
+            )
+            @RequestBody LoginRequest loginRequest
+    ){
+        return ResponseEntity.ok(authService.login(loginRequest));
+    }
+
 }
