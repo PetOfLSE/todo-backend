@@ -1,6 +1,7 @@
 package com.example.todo.auth.controller;
 
 import com.example.todo.auth.controller.request.LoginRequest;
+import com.example.todo.auth.controller.request.RefreshRequest;
 import com.example.todo.auth.controller.request.RegisterRequest;
 import com.example.todo.auth.controller.response.LoginResponse;
 import com.example.todo.auth.controller.response.UserResponse;
@@ -67,4 +68,8 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest refreshRequest){
+        return ResponseEntity.ok(authService.refresh(refreshRequest));
+    }
 }
