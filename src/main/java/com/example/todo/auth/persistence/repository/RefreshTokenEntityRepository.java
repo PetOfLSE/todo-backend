@@ -10,4 +10,6 @@ public interface RefreshTokenEntityRepository extends JpaRepository<RefreshToken
     boolean existsByUserSeq(Long userSeq);
 
     Optional<RefreshTokenEntity> findByUserSeq(Long userSeq);
+
+    Optional<RefreshTokenEntity> findByToken(String token);
 }
