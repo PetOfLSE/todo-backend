@@ -28,7 +28,7 @@ public class TodoEntity {
 
     @Column(name = "completed")
     @Comment("완료 여부")
-    private boolean completed;
+    private Boolean completed;
 
     @Column(name = "created_at")
     @Comment("생성 일시")
