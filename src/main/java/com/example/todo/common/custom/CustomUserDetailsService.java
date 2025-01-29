@@ -2,6 +2,7 @@ package com.example.todo.common.custom;
 
 import com.example.todo.auth.persistence.entity.UserEntity;
 import com.example.todo.auth.persistence.repository.UserEntityRepository;
+import com.example.todo.common.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         log.info("UserDetailsService username : {}", username);
 
         UserEntity entity = userEntityRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없음"));
 
         return new CustomUserDetails(entity);
     }
