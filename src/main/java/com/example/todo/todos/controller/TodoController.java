@@ -4,7 +4,6 @@ import com.example.todo.auth.controller.response.UserResponse;
 import com.example.todo.common.custom.CustomUserDetails;
 import com.example.todo.common.exception.response.ExceptionResponse;
 import com.example.todo.todos.controller.request.TodoAddRequest;
-import com.example.todo.todos.controller.request.TodoCompleteRequest;
 import com.example.todo.todos.controller.response.TodoResponse;
 import com.example.todo.todos.service.TodoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
