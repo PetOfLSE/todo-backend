@@ -9,8 +9,7 @@ import com.example.todo.auth.persistence.entity.RefreshTokenEntity;
 import com.example.todo.auth.persistence.entity.UserEntity;
 import com.example.todo.auth.persistence.repository.RefreshTokenEntityRepository;
 import com.example.todo.auth.persistence.repository.UserEntityRepository;
-import com.example.todo.common.exception.AlreadyEmailRegisterException;
-import com.example.todo.common.exception.AlreadyNicknameRegisterException;
+import com.example.todo.common.exception.*;
 import com.example.todo.common.jwt.JwtResponse;
 import com.example.todo.common.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -73,7 +72,7 @@ public class AuthService {
         Long id = claims.get("id", Long.class);
 
         UserEntity user = userEntityRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없음"));
 
         Date expirationDate = claims.getExpiration();
         Date issuedAtDate = claims.getIssuedAt();
@@ -96,7 +95,7 @@ public class AuthService {
 
         if(refreshTokenEntityRepository.existsByUserSeq(refreshTokenEntity.getUserSeq())) {
             RefreshTokenEntity refresh = refreshTokenEntityRepository.findByUserSeq(refreshTokenEntity.getUserSeq())
-                    .orElseThrow(() -> new RuntimeException("찾을 수 없는 토큰 정보"));
+                    .orElseThrow(() -> new TokenNotFoundException("찾을 수 없는 토큰 정보"));
 
             refreshTokenEntityRepository.delete(refresh);
         }
@@ -114,10 +113,10 @@ public class AuthService {
 
         Date expiration = claims.getExpiration();
         RefreshTokenEntity refreshTokenEntity = refreshTokenEntityRepository.findByToken(refreshRequest.getRefreshToken())
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 토큰")); // TODO 예외 교체 필요
+                .orElseThrow(() -> new TokenNotFoundException("존재하지 않는 토큰"));
 
         if(refreshTokenEntity.getUseYn().equals("N") || expiration.before(new Date())) {
-            throw new RuntimeException("사용이 만료된 토큰"); // TODO 예외 교체 필요
+            throw new ExpiredTokenException("사용이 만료된 토큰");
         }
 
         Authentication authentication = jwtUtil.getAuthentication(refreshRequest.getRefreshToken());
@@ -139,7 +138,7 @@ public class AuthService {
 
         String email = authentication.getName();
         UserEntity entity = userEntityRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));// TODO 예외 교체 필요
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾지 못함"));
 
         RefreshTokenEntity refreshEntity = RefreshTokenEntity.builder()
                 .token(refresh)
