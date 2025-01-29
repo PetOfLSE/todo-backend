@@ -49,15 +49,17 @@ public class AuthService {
                 .nickname(registerRequest.getNickname())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role("ROLE_USER")
+                .todo(null)
                 .build();
 
         userEntityRepository.save(entity);
 
         return UserResponse.builder()
+                .id(entity.getId())
                 .email(entity.getEmail())
                 .nickname(entity.getNickname())
-                .password(entity.getPassword())
                 .role(entity.getRole())
+                .todo(null)
                 .build();
     }
 
