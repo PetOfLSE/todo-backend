@@ -17,7 +17,7 @@ public class TodoResponse {
 
     private String content;
 
-    private boolean completed;
+    private Boolean completed;
 
     private LocalDateTime createdAt;
 
