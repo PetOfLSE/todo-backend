@@ -88,7 +88,7 @@ public class TodoController {
             }, description = "인증되지 않은 사용자일 경우 반환"),
             @ApiResponse(responseCode = "404", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
-            })
+            }, description = "사용자 또는 토큰을 찾지 못했을 경우 반환")
     })
     @PreAuthorize("hasRole('ROLE_USER')")
     @SecurityRequirement(name = "bearerAuth")
@@ -101,6 +101,18 @@ public class TodoController {
         return ResponseEntity.ok(service.delete(customUserDetails, todoId));
     }
 
+    @Operation(summary = "할일 전체 조회 API", description = "할 일 전체 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TodoResponse.class))
+            }),
+            @ApiResponse(responseCode = "401", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "인증되지 않은 사용자일 경우 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "사용자 또는 토큰을 찾지 못했을 경우 반환")
+    })
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/list")
     @SecurityRequirement(name = "bearerAuth")
