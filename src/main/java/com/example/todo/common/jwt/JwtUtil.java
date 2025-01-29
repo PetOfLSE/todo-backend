@@ -3,6 +3,8 @@ package com.example.todo.common.jwt;
 import com.example.todo.auth.persistence.entity.UserEntity;
 import com.example.todo.auth.persistence.repository.UserEntityRepository;
 import com.example.todo.common.custom.CustomUserDetails;
+import com.example.todo.common.exception.HasNotRoleTokenException;
+import com.example.todo.common.exception.UserNotFoundException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -46,7 +48,7 @@ public class JwtUtil {
 
         String email = authentication.getName();
         UserEntity entity = userEntityRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없음"));
 
         Date accessExpired = new Date(nowLong + 86400000);
         String accessToken = Jwts.builder()
@@ -80,7 +82,7 @@ public class JwtUtil {
         Claims claims = parseClaims(token);
 
         if(claims.get("auth") == null){
-            throw new RuntimeException("권한이 없음");
+            throw new HasNotRoleTokenException("권한이 없음");
         }
 
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
@@ -91,7 +93,7 @@ public class JwtUtil {
         Long id = Long.valueOf(strId);
 
         UserEntity entity = userEntityRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없음"));
 
         UserDetails customUserDetails = new CustomUserDetails(entity);
         return new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
