@@ -20,6 +20,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/todo")
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class TodoController {
     @Operation(summary = "할일 추가 API", description = "할일 추가 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200" ,content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TodoResponse.class))
             }, description = "성공 시 반환"),
             @ApiResponse(responseCode = "404", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
@@ -40,7 +42,7 @@ public class TodoController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/add")
-    public ResponseEntity<UserResponse> add(
+    public ResponseEntity<TodoResponse> add(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -67,7 +69,7 @@ public class TodoController {
     })
     @PreAuthorize("hasRole('ROLE_USER')")
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping("/complete")
+    @GetMapping("/complete")
     public ResponseEntity<TodoResponse> complete(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(name = "todoId", required = true, description = "할일 시퀀스")
@@ -97,6 +99,13 @@ public class TodoController {
             @RequestParam(name = "todoId") Long todoId
     ){
         return ResponseEntity.ok(service.delete(customUserDetails, todoId));
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/list")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<List<TodoResponse>> list(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(service.list(userDetails));
     }
 
 }
