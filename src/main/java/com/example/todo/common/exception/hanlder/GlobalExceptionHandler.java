@@ -10,6 +10,26 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(value = UnauthenticatedUserException.class)
+    public ResponseEntity<ExceptionResponse> handleUnauthenticatedUserException(UnauthenticatedUserException e) {
+        ExceptionResponse response = ExceptionResponse.builder()
+                .message(e.getMessage())
+                .code(e.getStatus().value())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(value = TodoNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleTodoNotFoundException(TodoNotFoundException e){
+        ExceptionResponse response = ExceptionResponse.builder()
+                .message(e.getMessage())
+                .code(e.getStatus().value())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(value = ExpiredTokenException.class)
     public ResponseEntity<ExceptionResponse> handleExpiredJwtException(ExpiredTokenException e) {
         ExceptionResponse response = ExceptionResponse.builder()
