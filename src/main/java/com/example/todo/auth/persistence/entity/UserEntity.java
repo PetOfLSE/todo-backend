@@ -1,8 +1,12 @@
 package com.example.todo.auth.persistence.entity;
 
+import com.example.todo.todos.persistence.entity.TodoEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,4 +42,7 @@ public class UserEntity {
     @Column(name = "role", length = 10)
     @Comment("사용자 권한")
     private String role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<TodoEntity> todo = new ArrayList<>();
 }
