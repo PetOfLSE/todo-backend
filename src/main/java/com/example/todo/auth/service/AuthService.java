@@ -1,6 +1,7 @@
 package com.example.todo.auth.service;
 
 import com.example.todo.auth.controller.request.LoginRequest;
+import com.example.todo.auth.controller.request.RefreshRequest;
 import com.example.todo.auth.controller.request.RegisterRequest;
 import com.example.todo.auth.controller.response.LoginResponse;
 import com.example.todo.auth.controller.response.UserResponse;
@@ -105,6 +106,58 @@ public class AuthService {
         return LoginResponse.builder()
                 .jwtResponse(jwtResponse)
                 .nickname(user.getNickname())
+                .build();
+    }
+
+    public LoginResponse refresh(RefreshRequest refreshRequest) {
+        Claims claims = jwtUtil.parseClaims(refreshRequest.getRefreshToken());
+
+        Date expiration = claims.getExpiration();
+        RefreshTokenEntity refreshTokenEntity = refreshTokenEntityRepository.findByToken(refreshRequest.getRefreshToken())
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 토큰")); // TODO 예외 교체 필요
+
+        if(refreshTokenEntity.getUseYn().equals("N") || expiration.before(new Date())) {
+            throw new RuntimeException("사용이 만료된 토큰"); // TODO 예외 교체 필요
+        }
+
+        Authentication authentication = jwtUtil.getAuthentication(refreshRequest.getRefreshToken());
+        JwtResponse jwtResponse = jwtUtil.generateToken(authentication);
+
+        String refresh = jwtResponse.getRefreshToken();
+        Claims refreshClaims = jwtUtil.parseClaims(refresh);
+
+        Date expiredDate = refreshClaims.getExpiration();
+        Date issuedDate = refreshClaims.getIssuedAt();
+
+        LocalDateTime expired = expiredDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        LocalDateTime issued = issuedDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        String email = authentication.getName();
+        UserEntity entity = userEntityRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));// TODO 예외 교체 필요
+
+        RefreshTokenEntity refreshEntity = RefreshTokenEntity.builder()
+                .token(refresh)
+                .expiresAt(expired)
+                .createdAt(issued)
+                .useYn("Y")
+                .userSeq(entity.getId())
+                .build();
+
+        if(refreshTokenEntityRepository.existsByUserSeq(refreshTokenEntity.getUserSeq())) {
+            refreshTokenEntityRepository.delete(refreshTokenEntity);
+        }
+
+        refreshTokenEntityRepository.save(refreshEntity);
+
+        return LoginResponse.builder()
+                .nickname(entity.getNickname())
+                .jwtResponse(jwtResponse)
                 .build();
     }
 }
