@@ -25,7 +25,7 @@ public class TodoService {
     private final TodoEntityRepository todoEntityRepository;
     private final UserEntityRepository userEntityRepository;
 
-    public UserResponse add(CustomUserDetails userDetails, TodoAddRequest request) {
+    public TodoResponse add(CustomUserDetails userDetails, TodoAddRequest request) {
         UserEntity user = userEntityRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없음"));
 
@@ -39,26 +39,15 @@ public class TodoService {
 
         user.getTodo().add(todo);
 
-        todoEntityRepository.save(todo);
-        UserEntity saveUserEntity = userEntityRepository.save(user);
+        TodoEntity saveTodo = todoEntityRepository.save(todo);
+        userEntityRepository.save(user);
 
-        List<TodoResponse> todoResponse = saveUserEntity.getTodo().stream()
-                .map(value -> {
-                    return TodoResponse.builder()
-                            .id(value.getId())
-                            .content(value.getContent())
-                            .completed(value.getCompleted())
-                            .createdAt(value.getCreatedAt())
-                            .updatedAt(value.getUpdatedAt())
-                            .build();
-                }).collect(Collectors.toList());
-
-        return UserResponse.builder()
-                .id(saveUserEntity.getId())
-                .email(saveUserEntity.getEmail())
-                .nickname(saveUserEntity.getNickname())
-                .role(saveUserEntity.getRole())
-                .todo(todoResponse)
+        return TodoResponse.builder()
+                .id(saveTodo.getId())
+                .content(saveTodo.getContent())
+                .completed(saveTodo.getCompleted())
+                .createdAt(saveTodo.getCreatedAt())
+                .updatedAt(saveTodo.getUpdatedAt())
                 .build();
     }
 
@@ -76,7 +65,12 @@ public class TodoService {
                 .findFirst()
                 .orElseThrow(() -> new TodoNotFoundException("할일을 찾을 수 없음"));
 
-        todo.setCompleted(true);
+        if(todo.getCompleted()){
+            todo.setCompleted(false);
+        }else{
+            todo.setCompleted(true);
+        }
+
         todo.setUpdatedAt(LocalDateTime.now());
 
         TodoEntity save = todoEntityRepository.save(todo);
@@ -125,5 +119,25 @@ public class TodoService {
                 .role(user.getRole())
                 .todo(todoResponse)
                 .build();
+    }
+
+    public List<TodoResponse> list(CustomUserDetails userDetails) {
+        if(userDetails == null){
+            throw new UnauthenticatedUserException("인증되지 않은 사용자");
+        }
+
+        UserEntity user = userEntityRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾지 못함"));
+
+        return user.getTodo().stream()
+                .map(value -> {
+                    return TodoResponse.builder()
+                            .id(value.getId())
+                            .content(value.getContent())
+                            .completed(value.getCompleted())
+                            .createdAt(value.getCreatedAt())
+                            .updatedAt(value.getUpdatedAt())
+                            .build();
+                }).collect(Collectors.toList());
     }
 }
