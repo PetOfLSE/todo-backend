@@ -54,7 +54,10 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))
-            }, description = "로그인 성공 시 반환")
+            }, description = "로그인 성공 시 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "사용자를 찾지 못하거나 토큰을 찾지 못했을 시 반환")
     })
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
@@ -68,6 +71,18 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
+    @Operation(summary = "토큰 재발급 API", description = "refresh 토큰을 사용해서 access token, refresh token을 재발급하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))
+            }, description = "재발급 성공 시 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "토큰 정보를 찾지 못했거나 사용자를 찾지 못했을 경우 반환"),
+            @ApiResponse(responseCode = "401", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "토큰이 만료되었을 경우 반환")
+    })
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest refreshRequest){
         return ResponseEntity.ok(authService.refresh(refreshRequest));
